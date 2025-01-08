@@ -1,0 +1,32 @@
+@font-face{
+    font-family: inter;
+    src: url(../assets/fonts/Inter/static/Inter-Regular.ttf);
+}
+
+html{
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+html{
+    width: 100%;
+    min-height: 100vh;
+}
+
+body{
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    direction:ltr;
+    font-variant-numeric: tabular-nums;
+    > #root{
+        width: 100%;
+        min-height: 100vh;
+    }
+    *{
+        font-family: Inter, serif;
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: border-box;
+    }
+}

@@ -1,0 +1,71 @@
+:root{
+
+    /* font size */
+    --fontSizeXS: 12px;
+    --fontSizeSM: 14px;
+    --fontSize: 16px;
+    --fontSizeLG: 18px;
+    --fontSizeXL: 20px;
+    --fontSizeXXL: 24px;
+    --fontSizeXXXL: 28px;
+
+    /* padding */
+    --paddingXXS: 4px;
+    --paddingXS: 8px;
+    --paddingSM: 12px;
+    --padding: 16px;
+    --paddingMD: 20px;
+    --paddingLG: 24px;
+    --paddingXL: 28px;
+    --paddingXXL: 32px;
+
+    /* margin */
+    --marginXXS: 4px;
+    --marginXS: 8px;
+    --marginSM: 12px;
+    --margin: 16px;
+    --marginMD: 20px;
+    --marginLG: 24px;
+    --marginXL: 28px;
+    --marginXXL: 44px;
+    
+    /* border radius */
+    --borderRadiusSM: 4px;
+    --borderRadius: 8px;
+    --borderRadiusXXL: 16px;
+
+    /* natural color */
+    --colorBg: #FFF;
+    --colorBgSecondary: #DDD;
+    --colorBgTrinity: #E9E9E9;
+    --colorBgUnavailable: #F9F9F9;
+    --colorBgHover: #F1F1F1;
+    --colorBgActive: #EEE;
+    --colorBgDisabled: #AAA;
+    
+    --colorBorder: #AAA;
+    --colorBorderSecondary: #C5C5C5;
+    --colorBorderTrinity: #EAEAEA;
+    --colorSecondary: #BBB;
+    --colorOutline: #333;
+    
+    --colorText: #333;
+    --colorTextSecondary: #666;
+    --colorTextTrinity: #777;
+    --colorTextDescription: #999;
+    
+    /* success color */
+    --colorBgSuccess: #f1f8f5;
+    --colorBorderSuccess: #95c9b4;
+    --colorTextSuccess: #007f5f;
+
+    /* error color */
+    --colorBgError: #FEE;
+    --colorBorderError: #F00;
+    --colorTextError: #F00;
+
+    /* CTA default colors */
+    --colorBgCtaDefault: #333;
+    --colorTextCtaDefault: #FFF;
+
+}
