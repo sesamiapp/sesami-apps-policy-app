@@ -15,5 +15,10 @@ export default defineConfig({
                 dir:'dist/'
             }
         }
+    },
+    server : {
+        watch: {
+            usePolling: true,
+        }
     }
 })

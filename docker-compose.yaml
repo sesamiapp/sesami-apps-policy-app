@@ -12,6 +12,7 @@ services:
       DATABASE_URL: mongodb://root:prisma@mongodb:27017/sesami-app?authSource=admin&directConnection=true
       PORT: 3000
       DEPLOYMENT_ENV: stage
+      CHOKIDAR_USEPOLLING: true
     depends_on:
       mongodb:
         condition: service_healthy
