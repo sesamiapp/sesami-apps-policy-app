@@ -12,7 +12,7 @@ import {
 import { InstallationController } from './sesami/api/installation';
 import { InstallationService } from './sesami/installation';
 import { webhookRoute } from './sesami/api/webhook';
-import { isAuthenticatedRequest } from './sesami/authentication/helper.ts';
+import { isAuthenticatedRequest } from './sesami/authentication/helper';
 
 const app = express();
 
@@ -31,21 +31,20 @@ app.get('/404', async (_req: Request, _res: Response, next: NextFunction) => {
 });
 
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.query.shopId) {
-        return next(new InvalidShopId());
-    }
-    if (
-        !(await InstallationService.isShopInstalled(
-            req.query.shopId as unknown as string,
-        ))
-    ) {
+    if (!config.isOAuthEnable) return next();
+
+    const { shopId } = req.query;
+
+    if (!shopId) return next(new InvalidShopId());
+    const isInstalled = await InstallationService.isShopInstalled(
+        req.query.shopId as unknown as string,
+    );
+    if (!isInstalled) {
         return InstallationController.initiateInstallation(req, res, next);
-    } else {
-        if (!(await isAuthenticatedRequest(req, res, next))) {
-            return next(new UnauthenticatedError());
-        }
-        next();
     }
+    const isAuthenticated = await isAuthenticatedRequest(req, res, next);
+    if (!isAuthenticated) return next(new UnauthenticatedError());
+    next();
 });
 
 app.get(
@@ -59,7 +58,7 @@ app.get('/health', async (_req: Request, res: Response) => {
     res.status(200).send('Ok');
 });
 
-app.use((err: Error, _req: Request, res: Response) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     errorHandler.handleError(err, res);
 });
 

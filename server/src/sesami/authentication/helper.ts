@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import config from '../config/Build.config.ts';
-import { jwtAuthenticate } from './Passport.authenticate.ts';
-import { validateHmac } from './Hmac.validation.ts';
+import config from '../config/Build.config';
+import { jwtAuthenticate } from './Passport.authenticate';
+import { validateHmac } from './Hmac.validation';
 
 export async function isAuthenticatedRequest(
     req: Request,

@@ -10,7 +10,6 @@
     "prisma:generate": "npx prisma generate",
     "prisma:push": "npx prisma db push",
     "build": "NODE_ENV=production vite build && NODE_ENV=production tsc -p tsconfig.build.json",
-    "build:dev": "NODE_ENV=development vite build && NODE_ENV=development tsc -p tsconfig.build.json",
     "typecheck": "tsc",
     "lint": "eslint ./client",
     "seed": "npx prisma db seed"
