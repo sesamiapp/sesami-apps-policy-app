@@ -1,9 +1,13 @@
 import { NotificationType } from '@sesamiapp/app-message';
 import { useServices } from '../api';
 import { AntdProvider, useSesami_AdminAppLoader } from '../hooks';
-import { Button, Typography } from 'antd';
-import { Service } from 'types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Button, Typography, Input } from 'antd';
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQuery,
+} from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 const { Title } = Typography;
 
@@ -23,11 +27,105 @@ export const Admin = () => (
     </QueryClientProvider>
 );
 
+const fetchPolicy = async (shopId: string) => {
+    const response = await fetch(
+        `http://localhost:3000/policy?shopId=${shopId}`,
+    );
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch policy');
+    }
+
+    return response.json();
+};
+
+const login = async (shopId: string) => {
+    const response = await fetch('http://localhost:3000/policy/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopId }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to login');
+    }
+
+    return response.json();
+};
+
+const send = async (shopId: string, policy: string, token: string) => {
+    const response = await fetch('http://localhost:3000/policy', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ shopId, policy }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to login');
+    }
+
+    return response.json();
+};
+
 const AdminContent = () => {
-    //services:
     const Sesami = useSesami_AdminAppLoader();
     const { data, isLoading, isError } = useServices(1);
-    const services = data?.items;
+
+    const [token, setToken] = useState<string | null>(null);
+    const { TextArea } = Input;
+    const [policyText, setPolicyText] = useState('');
+    const [shopId, setShopId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (Sesami) {
+            setShopId(Sesami.getShopId());
+        }
+    }, [Sesami]);
+
+    useEffect(() => {
+        const storedToken = localStorage.getItem('sesami-app-policy-jwtToken');
+
+        if (storedToken) {
+            setToken(storedToken);
+            return;
+        }
+    }, []);
+
+    const {
+        data: policyData,
+        isLoading: isPolicyLoading,
+        isError: isPolicyError,
+    } = useQuery({
+        queryKey: ['policy', shopId],
+        queryFn: () => fetchPolicy(shopId as string),
+        enabled: !!shopId,
+    });
+
+    const {
+        data: loginData,
+        isLoading: isLoginLoading,
+        isError: isLoginError,
+    } = useQuery({
+        queryKey: ['login', shopId],
+        queryFn: () => login(shopId as string),
+        enabled: () => !!shopId && !token,
+    });
+
+    useEffect(() => {
+        if (policyData) {
+            setPolicyText(policyData.text);
+        }
+    }, [policyData]);
+
+    useEffect(() => {
+        if (loginData) {
+            localStorage.setItem('sesami-app-policy-jwtToken', loginData);
+            setToken(loginData);
+        }
+    }, [loginData]);
 
     return isLoading || !Sesami ? (
         'loading...'
@@ -44,37 +142,37 @@ const AdminContent = () => {
             }}
         >
             <Title level={3} style={{ margin: 0 }}>
-                My App's Main Page(inside iframe)
+                Privacy Policy Manager
             </Title>
 
-            <div>
-                <a>Context from parent</a>
-                <ul>
-                    <li>shopId: {Sesami.getShopId()}</li>
-                    <li>locale: {Sesami.getLocale()}</li>
-                </ul>
-            </div>
-
-            <div>
-                <a>Shop services(directly fetched from admin with token)</a>
-                <ul>
-                    {services?.map((service: Service) => (
-                        <li key={service.id}>{service.title}</li>
-                    ))}
-                </ul>
-            </div>
+            <TextArea
+                rows={6}
+                value={policyText}
+                onChange={(e) => setPolicyText(e.target.value)}
+            />
 
             <Button
                 type="primary"
                 size="large"
-                onClick={() => {
-                    Sesami.showNotification(
-                        'This is from Admin!',
-                        NotificationType.SUCCESS,
-                    );
-                }}
+                onClick={async () =>
+                    shopId &&
+                    token &&
+                    (await send(shopId, policyText, token)
+                        .then(() =>
+                            Sesami.showNotification(
+                                'policy was updated',
+                                NotificationType.SUCCESS,
+                            ),
+                        )
+                        .catch(() =>
+                            Sesami.showNotification(
+                                'there was a problem in updating the policy',
+                                NotificationType.ERROR,
+                            ),
+                        ))
+                }
             >
-                Show Notification on Admin
+                Save
             </Button>
         </div>
     );

@@ -1,58 +1,116 @@
-import { useSesami_ExperienceIBForm } from '../hooks'
-import { useEffect, useState } from 'react'
+import { useSesami_ExperienceIBForm } from '../hooks';
+import { useEffect, useState } from 'react';
 
 /*
     This is a sample page for your extension inside the Experience(instant booking form target).
     It uses CSS for styling to make it lighter, but you can use whatever tech that you want.
 */
 
+const fetchPolicy = async (shopId: string) => {
+    const response = await fetch(
+        `http://localhost:3000/policy?shopId=${shopId}`,
+    );
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch policy');
+    }
+
+    return response.json();
+};
+
 export const Experience = () => {
-    
-    const Sesami = useSesami_ExperienceIBForm()
-    const [ message, setMessage ] = useState<string | null>(null)
+    const Sesami = useSesami_ExperienceIBForm();
+    const [policyText, setPolicyText] = useState<string | null>(null);
+    const [checked, setChecked] = useState(false);
+    const [shopId, setShopId] = useState<string | null>(null);
 
     useEffect(() => {
-        if(Sesami){
-            Sesami.onConfirm(async () => {
-                setMessage('Doing something...')
-                setTimeout(() => {
-                    setMessage('Done')
-                    setTimeout(() => Sesami?.acceptConfirm(), 300)
-                    setTimeout(() => setMessage(null) , 2000)
-                }, 2000)
-            })
+        if (Sesami) {
+            setShopId(Sesami.getShopId());
         }
-    }, [Sesami])
+    }, [Sesami]);
+
+    useEffect(() => {
+        if (shopId) {
+            (async () => {
+                const policy = await fetchPolicy(shopId as string);
+                setPolicyText(policy.text);
+            })();
+        }
+    }, [shopId]);
 
     return Sesami ? (
-        <div style={{
-            fontSize: 18,
-            padding: 32,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8
-        }}>
+        <div
+            style={{
+                fontSize: 18,
+                padding: 32,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+            }}
+        >
+            <label className="checkbox-container">
+                <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => setChecked(!checked)}
+                />
+                <span className="checkmark"></span>
+                <span className="label-text">
+                    I agree to the{' '}
+                    <a
+                        href={`/privacy-policy?policy=${encodeURIComponent(policyText as string)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        privacy policy
+                    </a>
+                </span>
+            </label>
 
-            <h3 style={{ marginTop: 0 }}>My Extension(inside iframe)</h3>
+            <style>
+                {`
+          .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            }
 
-            <div>
-                <a>Context from parent</a>
-                <ul>
-                    <li>shopId: {Sesami.getShopId()}</li>
-                    <li>productId: {Sesami.getProductId()}</li>
-                    <li>variantId: {Sesami.getVariantId()}</li>
-                    <li>quantity: {Sesami.getQuantity()}</li>
-                    <li>locale: {Sesami.getLocale()}</li>
-                    <li>timezone: {Sesami.getTimezone()}</li>
-                    <li>sessionId: {Sesami.getSessionId()}</li>
-                </ul>
-            </div>
+          .checkbox-container input {
+            display: none;
+          }
 
-            <p style={{ margin: 0, color: message === 'Done' ? 'green' : 'blue' }}>{message}</p>
+          .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+          }
 
+          .checkbox-container input:checked + .checkmark {
+            background: black;
+          }
+
+          .checkbox-container input:checked + .checkmark::after {
+            content: "✔";
+            color: white;
+            font-size: 14px;
+          }
+
+          .label-text {
+            margin-left: 8px;
+            color: black;
+          }
+        `}
+            </style>
         </div>
-    ) : <></>
-    
-}
+    ) : (
+        <></>
+    );
+};
 
-export default Experience
+export default Experience;

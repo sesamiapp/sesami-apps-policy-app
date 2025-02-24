@@ -13,6 +13,7 @@ import { InstallationController } from './sesami/api/installation';
 import { InstallationService } from './sesami/installation';
 import { webhookRoute } from './sesami/api/webhook';
 import { isAuthenticatedRequest } from './sesami/authentication/helper';
+import PolicyRoutes from './policy/Policy.router';
 
 const app = express();
 
@@ -46,6 +47,31 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
     if (!isAuthenticated) return next(new UnauthenticatedError());
     next();
 });
+
+app.use('/policy', PolicyRoutes);
+
+app.use(
+    '/test/makeShop',
+    async (req: Request, res: Response, next: NextFunction) => {
+        const data = await prisma.shop.upsert({
+            create: {
+                installationStatus: 'AUTHORIZED',
+                policy: {
+                    text: '',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+                shopId: req.body.shopId,
+            },
+            update: {
+                installationStatus: 'AUTHORIZED',
+            },
+            where: { shopId: req.body.shopId },
+        });
+
+        return res.status(200).send('ok');
+    },
+);
 
 app.get(
     '/oauth/call-back',

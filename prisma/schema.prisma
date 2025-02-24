@@ -9,11 +9,19 @@ datasource db {
 }
 
 model Shop {
-  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                     String    @id @default(auto()) @map("_id") @db.ObjectId
   name                   String?
-  shopId                 String   @unique
+  shopId                 String    @unique
   installationStatus     String?
   apiKey                 String?
   scope                  String?
   lastGetPermissionRetry DateTime?
+
+  policy Policy?
+}
+
+type Policy {
+  text      String   @db.String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
