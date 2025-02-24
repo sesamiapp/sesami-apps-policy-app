@@ -1,21 +1,49 @@
-Requires docker compose 2+
+# Sesami App (Forked Boilerplate for Privacy Policy Implementation)
 
-## Spin up a dev env:
-`docker compose up`
+This project is a fork of a boilerplate for implementing a privacy policy app.
 
-You should get an "OK" message from: http://localhost:3000/health.
+## Requirements
+
+Requires Docker Compose 2+.
+
+## Spin Up a Development Environment
+
+Run the following command to start the development environment:
+
+```sh
+docker compose up
+```
+
+You should see an "OK" message from: [http://localhost:3000/health](http://localhost:3000/health).
 
 ### Load Frontend
-Your frontend is accessible at: http://localhost:3000/. 
+
+Your frontend is accessible at: [http://localhost:3000/](http://localhost:3000/).
 
 This route requires authentication. You can enable or disable authentication by modifying the `isOAuthEnable` property in the `./server/src/sesami/config/Build.config.ts` file.
 
 **Note:**
-
 Ensure that the `isOAuthEnable` property is set to `true` before deploying your app to the production environment.
 
-#### Production build
-DOCKER_BUILDKIT=1  docker build . --target prod -t sesami-app --build-arg GH_NPM_TOKEN=$GH_NPM_TOKEN  
+## Production
 
-#### Production run command
+### Build
+
+```sh
+DOCKER_BUILDKIT=1 docker build . --target prod -t sesami-app --build-arg GH_NPM_TOKEN=$GH_NPM_TOKEN
+```
+
+### Run
+
+```sh
 docker run -e DATABASE_URL="<DATABASE_URL>" -p 3000:3000 sesami-app
+```
+
+## TODO List
+
+- Improve the UI for the privacy policy page.
+- Implement a more advanced JWT security mechanism.
+- Add a two-stage action verification using Gmail.
+- Create a setup section for first-time installation.
+- Define a comprehensive privacy policy for the app.
+- Replace the text box with a rich text editor for better formatting options.
