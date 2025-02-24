@@ -49,60 +49,20 @@ export const Experience = () => {
                 gap: 8,
             }}
         >
-            <label className="checkbox-container">
-                <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => setChecked(!checked)}
-                />
-                <span className="checkmark"></span>
-                <span className="label-text">
-                    I agree to the{' '}
-                    <a
-                        href={`/privacy-policy?policy=${encodeURIComponent(policyText as string)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        privacy policy
-                    </a>
-                </span>
-            </label>
+            <span className="label-text">
+                By continuing, you confirm that you have read and accepted the{' '}
+                <a
+                    href={`/privacy-policy?policy=${encodeURIComponent(policyText as string)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    privacy policy
+                </a>
+            </span>
 
             <style>
                 {`
-          .checkbox-container {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            }
-
-          .checkbox-container input {
-            display: none;
-          }
-
-          .checkmark {
-            width: 20px;
-            height: 20px;
-            border: 2px solid black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.3s;
-          }
-
-          .checkbox-container input:checked + .checkmark {
-            background: black;
-          }
-
-          .checkbox-container input:checked + .checkmark::after {
-            content: "✔";
-            color: white;
-            font-size: 14px;
-          }
-
           .label-text {
-            margin-left: 8px;
             color: black;
           }
         `}
