@@ -21,7 +21,6 @@ const fetchPolicy = async (shopId: string) => {
 export const Experience = () => {
     const Sesami = useSesami_ExperienceIBForm();
     const [policyText, setPolicyText] = useState<string | null>(null);
-    const [checked, setChecked] = useState(false);
     const [shopId, setShopId] = useState<string | null>(null);
 
     useEffect(() => {
