@@ -25,25 +25,10 @@ This route requires authentication. You can enable or disable authentication by 
 **Note:**
 Ensure that the `isOAuthEnable` property is set to `true` before deploying your app to the production environment.
 
-## Production
+#### Production build
 
-### Build
+DOCKER_BUILDKIT=1 docker build . --target prod -t sesami-app
 
-```sh
-DOCKER_BUILDKIT=1 docker build . --target prod -t sesami-app --build-arg GH_NPM_TOKEN=$GH_NPM_TOKEN
-```
+#### Production run command
 
-### Run
-
-```sh
-docker run -e DATABASE_URL="<DATABASE_URL>" -p 3000:3000 sesami-app
-```
-
-## TODO List
-
-- Improve the UI for the privacy policy page.
-- Implement a more advanced JWT security mechanism.
-- Add a two-stage action verification using Gmail.
-- Create a setup section for first-time installation.
-- Define a comprehensive privacy policy for the app.
-- Replace the text box with a rich text editor for better formatting options.
+docker run -e DATABASE_URL="<DATABASE_URL>" -p 3000:80 sesami-app
