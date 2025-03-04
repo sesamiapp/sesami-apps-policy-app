@@ -5,6 +5,11 @@ export class ShopRepository {
         return prisma.shop.upsert({
             create: {
                 ...data,
+                policy: {
+                    text: '',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
                 shopId,
             },
             update: {
@@ -68,14 +73,14 @@ export class ShopRepository {
         try {
             await prisma.shop.findUniqueOrThrow({
                 where: { id: shopId },
-            })
+            });
             return await prisma.shop.update({
                 where: { id: shopId },
                 data: newData,
             });
-        } catch (error:any) {
+        } catch (error: any) {
             if (error.code === 'P2025') {
-                return null
+                return null;
             }
             throw error;
         }
