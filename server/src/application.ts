@@ -23,6 +23,7 @@ if (config.environment !== 'production') {
     app.use(cors());
 }
 
+// @ts-ignore
 app.use(passport.initialize());
 app.use(express.json());
 app.use(winstonMiddleware);
@@ -44,34 +45,12 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
         return InstallationController.initiateInstallation(req, res, next);
     }
     const isAuthenticated = await isAuthenticatedRequest(req, res, next);
+    console.log('🚀 ~ app.get ~ isAuthenticated:', isAuthenticated);
     if (!isAuthenticated) return next(new UnauthenticatedError());
     next();
 });
 
 app.use('/policy', PolicyRoutes);
-
-app.use(
-    '/test/makeShop',
-    async (req: Request, res: Response, next: NextFunction) => {
-        const data = await prisma.shop.upsert({
-            create: {
-                installationStatus: 'AUTHORIZED',
-                policy: {
-                    text: '',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                },
-                shopId: req.body.shopId,
-            },
-            update: {
-                installationStatus: 'AUTHORIZED',
-            },
-            where: { shopId: req.body.shopId },
-        });
-
-        return res.status(200).send('ok');
-    },
-);
 
 app.get(
     '/oauth/call-back',
