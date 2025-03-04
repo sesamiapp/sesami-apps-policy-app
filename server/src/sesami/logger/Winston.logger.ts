@@ -13,7 +13,7 @@ export const logger = createLogger({
         format.colorize(),
         format.timestamp({ format: timestampFormat }),
         format.printf((info) => {
-            return `[${info.timestamp}] [${info.stack?.split('\n')[0]}] ${info.level}: ${info.message}`;
+            return `[${info.timestamp}] ${info.level}: ${info.message}`;
         }),
     ),
 });
