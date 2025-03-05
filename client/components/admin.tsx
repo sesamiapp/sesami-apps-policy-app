@@ -1,22 +1,18 @@
 import { NotificationType } from '@sesamiapp/app-message';
 import { useServices } from '../api';
 import { AntdProvider, useSesami_AdminAppLoader } from '../hooks';
-import { Button, Typography, Input } from 'antd';
+import { Button, Typography } from 'antd';
 import {
     QueryClient,
     QueryClientProvider,
     useQuery,
 } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { fetchPolicy, login, sendPolicy } from './api'; // API functions
 
 const { Title } = Typography;
-
-/*
-    This is a sample home page for your app inside the Admin Portal.
-    It uses React and Ant Design(with a custom theme) to match the design of the Admin,
-    but you can use whatever tech that you want.
-*/
-
 const queryClient = new QueryClient();
 
 export const Admin = () => (
@@ -27,58 +23,14 @@ export const Admin = () => (
     </QueryClientProvider>
 );
 
-const fetchPolicy = async (shopId: string) => {
-    const response = await fetch(
-        `http://localhost:3000/policy?shopId=${shopId}`,
-    );
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch policy');
-    }
-
-    return response.json();
-};
-
-const login = async (shopId: string) => {
-    const response = await fetch('http://localhost:3000/policy/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopId }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to login');
-    }
-
-    return response.json();
-};
-
-const send = async (shopId: string, policy: string, token: string) => {
-    const response = await fetch('http://localhost:3000/policy', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ shopId, policy }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to login');
-    }
-
-    return response.json();
-};
-
 const AdminContent = () => {
     const Sesami = useSesami_AdminAppLoader();
     const { data, isLoading, isError } = useServices(1);
-
-    const [token, setToken] = useState<string | null>(null);
-    const { TextArea } = Input;
     const [policyText, setPolicyText] = useState('');
     const [shopId, setShopId] = useState<string | null>(null);
+    const [token, setToken] = useState<string | null>(null);
 
+    // Fetch shop ID from Sesami when it's available
     useEffect(() => {
         if (Sesami) {
             setShopId(Sesami.getShopId());
@@ -87,39 +39,27 @@ const AdminContent = () => {
 
     useEffect(() => {
         const storedToken = localStorage.getItem('sesami-app-policy-jwtToken');
-
-        if (storedToken) {
-            setToken(storedToken);
-            return;
-        }
+        if (storedToken) setToken(storedToken);
     }, []);
 
-    const {
-        data: policyData,
-        isLoading: isPolicyLoading,
-        isError: isPolicyError,
-    } = useQuery({
+    const { data: policyData } = useQuery({
         queryKey: ['policy', shopId],
         queryFn: () => fetchPolicy(shopId as string),
         enabled: !!shopId,
     });
 
-    const {
-        data: loginData,
-        isLoading: isLoginLoading,
-        isError: isLoginError,
-    } = useQuery({
+    const { data: loginData } = useQuery({
         queryKey: ['login', shopId],
         queryFn: () => login(shopId as string),
         enabled: () => !!shopId && !token,
     });
 
+    // Set policy text when policy data is fetched
     useEffect(() => {
-        if (policyData) {
-            setPolicyText(policyData.text);
-        }
+        if (policyData) setPolicyText(policyData.text);
     }, [policyData]);
 
+    // Store login token when fetched
     useEffect(() => {
         if (loginData) {
             localStorage.setItem('sesami-app-policy-jwtToken', loginData);
@@ -127,53 +67,70 @@ const AdminContent = () => {
         }
     }, [loginData]);
 
-    return isLoading || !Sesami ? (
-        'loading...'
-    ) : isError ? (
-        'error'
-    ) : (
-        <div
-            style={{
-                fontSize: 18,
-                padding: 32,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 24,
-            }}
-        >
-            <Title level={3} style={{ margin: 0 }}>
-                Privacy Policy Manager
-            </Title>
+    // Handle Save Policy
+    const handleSave = async () => {
+        if (!shopId || !token) return;
 
-            <TextArea
-                rows={6}
+        try {
+            await sendPolicy(shopId, policyText, token);
+            Sesami?.showNotification(
+                'Policy was updated',
+                NotificationType.SUCCESS,
+            );
+        } catch {
+            Sesami?.showNotification(
+                'There was a problem updating the policy',
+                NotificationType.ERROR,
+            );
+        }
+    };
+
+    if (isLoading || !Sesami) return <p>Loading...</p>;
+    if (isError) return <p>Error loading data</p>;
+
+    return (
+        <div className="admin-container">
+            <div className="header">
+                <Title level={3}>Privacy Policy Manager</Title>
+                <Button type="primary" size="large" onClick={handleSave}>
+                    Save
+                </Button>
+            </div>
+
+            <ReactQuill
+                theme="snow"
                 value={policyText}
-                onChange={(e) => setPolicyText(e.target.value)}
+                onChange={setPolicyText}
+                className="richText"
             />
 
-            <Button
-                type="primary"
-                size="large"
-                onClick={async () =>
-                    shopId &&
-                    token &&
-                    (await send(shopId, policyText, token)
-                        .then(() =>
-                            Sesami.showNotification(
-                                'policy was updated',
-                                NotificationType.SUCCESS,
-                            ),
-                        )
-                        .catch(() =>
-                            Sesami.showNotification(
-                                'there was a problem in updating the policy',
-                                NotificationType.ERROR,
-                            ),
-                        ))
+            <style>
+                {`
+                .admin-container {
+                    font-size: 18px;
+                    padding: 32px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
                 }
-            >
-                Save
-            </Button>
+                .header{
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between 
+                }
+                .header h3{
+                    margin:0 !important;
+                }
+                .richText{
+                    max-height: 80vh;
+                    overflow-y: auto;
+                }
+                .Button{
+                    width: fit-content;
+                    align-self: flex-end;
+                }
+                `}
+            </style>
         </div>
     );
 };
